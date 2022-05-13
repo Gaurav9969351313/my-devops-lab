@@ -103,3 +103,113 @@ curl --include --silent http://localhost:8081/ | grep Server
 ==============================================================
 sudo chcon -R -t bin_t /app/nexus/bin/nexus
 
+==================================================================================================
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.provider "virtualbox" do |rs|
+    rs.memory = 2048
+    rs.cpus = 2
+  end
+
+  # Will not check for box updates during every startup.
+  config.vm.box_check_update = false
+
+  config.vm.synced_folder ".", "/vagrant"
+
+  config.vm.define "controller" do |controller| # this is a gitlab server
+    controller.vm.box = "ubuntu/focal64"
+    controller.vm.hostname = "controller.gtlab.com"
+    controller.vm.network "private_network", ip: "192.168.0.1"
+    config.vm.network "forwarded_port", guest: 8080, host: 8080
+    config.vm.network "forwarded_port", guest: 5432, host: 5432
+    
+    controller.vm.provision "shell", path: "install_gitlab.sh", privileged: true 
+    controller.vm.provision "shell", path: "install_nexus.sh", privileged: true 
+    controller.vm.provision "shell", path: "install_ansible_tower.sh", privileged: true 
+    controller.vm.provision "file", source: "key_gen.sh", destination: "/home/vagrant/"
+  end
+
+end
+
+
+==================================================================================================
+config.vm.network "forwarded_port", guest: 5432, host: 7001
+config.vm.synced_folder ".", "/vagrant"
+
+vagrant reload
+==================================================================================================
+install_gitlab.sh
+-----------------
+
+#! /bin/bash
+mkdir /opt/setups
+echo "================================= Started Downloading Gitlab ================================="
+curl --silent "https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh" | sudo bash
+sudo apt-get install --download-only gitlab-ee
+echo "================================= Copying Gitlab *.deb to /opt/setups ========================"
+sudo cp /var/cache/apt/archives/*.deb /opt/setups
+echo "================================= Gitlab Installation Started ================================"
+sudo dpkg -i *.deb
+==================================================================================================
+
+install_nexus.sh
+----------------
+#! /bin/bash
+mkdir /opt/setups
+
+echo "================================= Installation Started With Java ============================"
+sudo apt install -y openjdk-8-jre-headless 
+
+cd /opt/setups
+echo "================================= Started Downloading Nexus ================================="
+sudo wget -O nexus.tar.gz https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+sudo tar -xvf nexus.tar.gz
+sudo mv nexus-3* nexus
+sudo adduser nexus
+
+sudo chown -R nexus:nexus nexus
+sudo chown -R nexus:nexus sonatype-work
+
+sudo systemctl start nexus
+echo "================================= Nexus Password ==========================================="
+cat /app/sonatype-work/nexus3/admin.password
+
+curl --include --silent http://localhost:8081/ | grep Server
+==================================================================================================
+
+install_ansible_tower.sh
+------------------------
+#! /bin/bash
+cd /opt/setups
+sudo wget -O ansible-tower.tar.gz https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-latest.tar.gz
+sudo tar -xvf ansible-tower.tar.gz
+==================================================================================================
+install_postgres.sh
+-------------------
+
+#! /bin/bash
+
+sudo apt install -y postgresql postgresql-contrib
+sudo systemctl start postgresql.service
+
+# sudo -i -u postgres
+# sudo -u postgres psql
+# sudo -u postgres createuser --interactive
+==================================================================================================
+install_docker.sh
+-----------------
+
+#! /bin/bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+==================================================================================================
+
+
