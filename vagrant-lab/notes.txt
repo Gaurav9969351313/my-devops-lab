@@ -212,98 +212,100 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 ==================================================================================================
 
+// jhipster import-jdl ./ssp.jdl --force
+
 entity DmmDsAuditHistory {
-	triggerFileId String, 
-     outputFileName String, 
-     processStep String, 
-     status String, 
-     recordsCount Long, 
-     traceId String, 
+	triggerFileId String 
+     outputFileName String 
+     processStep String 
+     status String 
+     recordsCount Long 
+     traceId String 
      dsId Long
 }
 
 entity DmmDsIOParameters {
-     name String,
-     type String,
-     description String,
-     valu Stringe
+     name String
+     type String
+     description String
+     valu String
 }
 
 entity DmmDsMasterData {
-	 serviceName String,
-      triggerFilePath String,
-      sqlFileName String,
-      spName String,
-      sourceDbName String,
-      isInstanceActive Boolean,
+	 serviceName String
+      triggerFilePath String
+      sqlFileName String
+      spName String
+      sourceDbName String
+      isInstanceActive Boolean
       executionType String
 }
 
 entity DmmDsOutputFileDetails {
-	 fileId String,
-      suffix String,
-      format String,
-      path String,
-      skipHeaders Boolean,
-      trailerRecord String,
+	 fileId String
+      suffix String
+      format String
+      path String
+      skipHeaders Boolean
+      trailerRecord String
       sheetName String
 }
 
-entity DmmFtgDependentFileDetails {
-	identifier String,
-     suffix String,
-     format String,
+entity DependentFileDetails {
+	identifier String
+     suffix String
+     format String
      hasHeaders Boolean
 }
 
 entity DmmFtgInstanceDetails {
-	 inputFileDelimiter String,
-      rptInputFileSuffix String,
-      isInstanceActive String,
-      isRptMultiTabExcel String,
-      lastUpdatedBy String,
-      rptInputFileIdentifier String,
-      rptInputFolder String,
-      rptInputFormat String,
-      isEmptyRptCheckRequired String,
+	 inputFileDelimiter String
+      rptInputFileSuffix String
+      isInstanceActive String
+      isRptMultiTabExcel String
+      lastUpdatedBy String
+      rptInputFileIdentifier String
+      rptInputFolder String
+      rptInputFormat String
+      isEmptyRptCheckRequired String
       reportSource String
 }
 
 entity DmmFtgMaster {
-      clientName String,
+      clientName String
       isClientActive String
 }
 
-entity DmmFtgTransmissionDetails {
-	fileFormatterClass String,
-     transType String,
-     transParams String,
-     isPwdProtectionRequired String,
-     isRptCsvWithoutQuotes String,
-     outputFileDelimiter String,
-     outputFileSuffix String,
-     rptBccEmailId String,
-     rptCcEmailId String,
-     rptEmailSubjectLine String,
-     rptFromEmailId String,
-     rptOutputFileIdentifier String,
-     rptOutputFormat String,
-     rptTemplateName String,
-     rptToEmailId String,
+entity TransmissionDetails {
+	fileFormatterClass String
+     transType String
+     transParams String
+     isPwdProtectionRequired String
+     isRptCsvWithoutQuotes String
+     outputFileDelimiter String
+     outputFileSuffix String
+     rptBccEmailId String
+     rptCcEmailId String
+     rptEmailSubjectLine String
+     rptFromEmailId String
+     rptOutputFileIdentifier String
+     rptOutputFormat String
+     rptTemplateName String
+     rptToEmailId String
      checkSumAlgorithm String
 }
 
-entity {
-	rptTransId Long,
-     inputFileName String,
-     outputFileName String,
-     processStep String,
-     status String,
-     recordCount Long,
-     notes String,
+entity TransmissionHistory {
+	rptTransId Long
+     inputFileName String
+     outputFileName String
+     processStep String
+     status String
+     recordCount Long
+     notes String
      traceId String
 }
 
 dto * with mapstruct
 service all with serviceImpl
-
+skipClient all
